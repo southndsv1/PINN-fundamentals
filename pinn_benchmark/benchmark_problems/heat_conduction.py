@@ -75,18 +75,16 @@ class HeatConduction1D:
         Returns:
             PDE residual
         """
-        x = xt[:, 0:1]
-        t = xt[:, 1:2]
-
-        # Requires grad for automatic differentiation
-        x.requires_grad = True
-        t.requires_grad = True
-
-        # Reconstruct input
-        xt_grad = torch.cat([x, t], dim=1)
+        # Ensure requires_grad is enabled
+        if not xt.requires_grad:
+            xt.requires_grad = True
 
         # Network prediction
-        u = network(xt_grad)
+        u = network(xt)
+
+        # Extract coordinates for gradient computation
+        x = xt[:, 0:1]
+        t = xt[:, 1:2]
 
         # First derivatives
         u_t = torch.autograd.grad(

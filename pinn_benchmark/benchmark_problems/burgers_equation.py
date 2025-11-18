@@ -59,14 +59,16 @@ class BurgersEquation:
         Returns:
             PDE residual
         """
+        # Ensure requires_grad is enabled
+        if not xt.requires_grad:
+            xt.requires_grad = True
+
+        # Network prediction
+        u = network(xt)
+
+        # Extract coordinates for gradient computation
         x = xt[:, 0:1]
         t = xt[:, 1:2]
-
-        x.requires_grad = True
-        t.requires_grad = True
-
-        xt_grad = torch.cat([x, t], dim=1)
-        u = network(xt_grad)
 
         # First derivatives
         u_t = torch.autograd.grad(
