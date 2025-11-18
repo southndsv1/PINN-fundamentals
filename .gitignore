@@ -22,11 +22,11 @@ wheels/
 
 # Results
 results/
-demo_results/
-*.png
-*.jpg
+# demo_results/ - Allow demo results to be committed
+# *.png - Allow plots to be committed
+# *.jpg - Allow plots to be committed
+# *.json - Allow benchmark results to be committed
 *.pdf
-*.json
 
 # Checkpoints
 checkpoints/

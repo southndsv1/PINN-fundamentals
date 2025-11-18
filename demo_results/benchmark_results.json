@@ -1,0 +1,74 @@
+[
+  {
+    "pinn_variant": "Vanilla",
+    "problem": "Heat Conduction",
+    "training_time": 99.95,
+    "final_loss": 0.00021987546733520774,
+    "l2_error": 0.005439313552173499,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Adaptive",
+    "problem": "Heat Conduction",
+    "training_time": 99.95,
+    "final_loss": 7.412133022145724e-05,
+    "l2_error": 0.004398593054074355,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Causal",
+    "problem": "Heat Conduction",
+    "training_time": 99.95,
+    "final_loss": 0.0001357997280162438,
+    "l2_error": 0.005385239951964679,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Vanilla",
+    "problem": "Wave Propagation",
+    "training_time": 99.95,
+    "final_loss": 0.0002190582558687797,
+    "l2_error": 0.004857991325502981,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Adaptive",
+    "problem": "Wave Propagation",
+    "training_time": 99.95,
+    "final_loss": 7.499291147264995e-05,
+    "l2_error": 0.004449361107629503,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Causal",
+    "problem": "Wave Propagation",
+    "training_time": 99.95,
+    "final_loss": 0.00013526116413458325,
+    "l2_error": 0.0039146023820997924,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Vanilla",
+    "problem": "Burgers Equation",
+    "training_time": 99.95,
+    "final_loss": 0.00021882528557617032,
+    "l2_error": 0.004710579769416658,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Adaptive",
+    "problem": "Burgers Equation",
+    "training_time": 99.95,
+    "final_loss": 7.465897025620198e-05,
+    "l2_error": 0.004795629243064679,
+    "epochs": 2000
+  },
+  {
+    "pinn_variant": "Causal",
+    "problem": "Burgers Equation",
+    "training_time": 99.95,
+    "final_loss": 0.00013536067653553149,
+    "l2_error": 0.005476281728927876,
+    "epochs": 2000
+  }
+]
