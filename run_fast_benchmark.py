@@ -23,7 +23,13 @@ except ImportError:
     sys.exit(1)
 
 from pinn_benchmark.pinn_variants import (
-    VanillaPINN, AdaptivePINN, CausalPINN
+    VanillaPINN,
+    VariationalPINN,
+    ConservativePINN,
+    BayesianPINN,
+    GradientEnhancedPINN,
+    AdaptivePINN,
+    CausalPINN
 )
 from pinn_benchmark.benchmark_problems import (
     HeatConduction1D, WavePropagation1D, BurgersEquation
@@ -103,6 +109,39 @@ def run_experiment(pinn_variant_name, problem_name, problem, config):
         )
     elif pinn_variant_name == 'Causal':
         pinn = CausalPINN(
+            pde_residual_fn=pde_residual_fn,
+            layers=layers,
+            learning_rate=config.learning_rate,
+            device=config.device,
+            lambda_physics=config.lambda_physics
+        )
+    elif pinn_variant_name == 'Variational':
+        pinn = VariationalPINN(
+            pde_residual_fn=pde_residual_fn,
+            layers=layers,
+            learning_rate=config.learning_rate,
+            device=config.device,
+            lambda_physics=config.lambda_physics
+        )
+    elif pinn_variant_name == 'Conservative':
+        pinn = ConservativePINN(
+            pde_residual_fn=pde_residual_fn,
+            layers=layers,
+            learning_rate=config.learning_rate,
+            device=config.device,
+            lambda_physics=config.lambda_physics
+        )
+    elif pinn_variant_name == 'Bayesian':
+        pinn = BayesianPINN(
+            pde_residual_fn=pde_residual_fn,
+            layers=layers,
+            learning_rate=config.learning_rate,
+            device=config.device,
+            lambda_physics=config.lambda_physics,
+            n_samples=5  # Reduced for speed
+        )
+    elif pinn_variant_name == 'Gradient-Enhanced':
+        pinn = GradientEnhancedPINN(
             pde_residual_fn=pde_residual_fn,
             layers=layers,
             learning_rate=config.learning_rate,
@@ -209,8 +248,16 @@ def main():
         'Burgers Equation': BurgersEquation(nu=0.01)
     }
 
-    # Select PINN variants
-    pinn_variants = ['Vanilla', 'Adaptive', 'Causal']
+    # Select PINN variants - ALL 7 VARIANTS
+    pinn_variants = [
+        'Vanilla',
+        'Variational',
+        'Conservative',
+        'Bayesian',
+        'Gradient-Enhanced',
+        'Adaptive',
+        'Causal'
+    ]
 
     # Run experiments
     all_results = []
