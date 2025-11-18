@@ -117,7 +117,7 @@ def run_experiment(pinn_variant_name, problem_name, problem, config):
         )
     elif pinn_variant_name == 'Variational':
         pinn = VariationalPINN(
-            pde_residual_fn=pde_residual_fn,
+            # energy_functional_fn is optional, uses default diffusion energy
             layers=layers,
             learning_rate=config.learning_rate,
             device=config.device,

@@ -18,15 +18,16 @@ class VariationalPINN(BasePINN):
 
     def __init__(
         self,
-        energy_functional_fn: Callable,
+        energy_functional_fn: Optional[Callable] = None,
         **kwargs
     ):
         """
         Initialize Variational PINN.
 
         Args:
-            energy_functional_fn: Function that computes energy functional
-                                 Should take (network, x, test_fn) and return energy
+            energy_functional_fn: Optional function that computes energy functional
+                                 Should take (network, x) and return energy
+                                 If None, uses default diffusion energy functional
             **kwargs: Additional arguments for BasePINN
         """
         super().__init__(**kwargs)
@@ -48,7 +49,18 @@ class VariationalPINN(BasePINN):
 
         # Compute weak residual using integration by parts
         # This is problem-specific and handled by energy_functional_fn
-        residual = self.energy_functional_fn(self.network, x)
+        if self.energy_functional_fn is not None:
+            residual = self.energy_functional_fn(self.network, x)
+        else:
+            # Default: use gradient-based energy (works for diffusion-type problems)
+            u_grad = torch.autograd.grad(
+                u, x,
+                grad_outputs=torch.ones_like(u),
+                create_graph=True,
+                retain_graph=True
+            )[0]
+            # Simple energy: 0.5 * |∇u|²
+            residual = 0.5 * torch.sum(u_grad ** 2, dim=1, keepdim=True)
 
         return residual
 
