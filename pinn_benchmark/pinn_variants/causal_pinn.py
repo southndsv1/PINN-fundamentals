@@ -22,7 +22,7 @@ class CausalPINN(BasePINN):
         self,
         pde_residual_fn: Callable,
         n_time_segments: int = 10,
-        causal_weight: float = 10.0,
+        causal_weight: float = 1.0,
         **kwargs
     ):
         """
@@ -31,7 +31,7 @@ class CausalPINN(BasePINN):
         Args:
             pde_residual_fn: Function that computes PDE residual
             n_time_segments: Number of time segments for sequential training
-            causal_weight: Weight emphasizing causality
+            causal_weight: Weight emphasizing causality (reduced from 10.0 to 1.0 to prevent NaN)
             **kwargs: Additional arguments for BasePINN
         """
         super().__init__(**kwargs)
@@ -63,12 +63,19 @@ class CausalPINN(BasePINN):
         Returns:
             Causality weights
         """
-        # Extract time coordinate
-        t = x[:, time_idx:time_idx+1]
+        # Extract time coordinate (assume last dimension is time)
+        if time_idx == -1:
+            t = x[:, -1:]  # Properly extract last column
+        else:
+            t = x[:, time_idx:time_idx+1]
 
-        # Exponential decay from current time window
+        # Simple linear weighting to avoid numerical issues with sqrt/exp
         # Earlier times get higher weights
-        weights = torch.exp(-self.causal_weight * (t / (self.current_time_window + 1e-8)))
+        t_normalized = torch.clamp(t / (self.current_time_window + 1e-8), 0.0, 1.0)
+        # Linear decay: weight = 1.0 at t=0, weight decreases as t increases
+        # With causal_weight=1.0: goes from 1.0 at t=0 to 0.1 at t=1
+        weights = 1.0 - 0.9 * self.causal_weight * t_normalized
+        weights = torch.clamp(weights, 0.1, 1.0)  # Keep minimum weight at 0.1
 
         return weights
 
@@ -123,11 +130,12 @@ class CausalPINN(BasePINN):
         else:
             loss_dict['boundary_loss'] = 0.0
 
-        # Initial condition loss (heavily weighted in causal training)
+        # Initial condition loss (moderately weighted in causal training)
         if x_initial is not None and u_initial is not None:
             u_ic_pred = self.network(x_initial)
             ic_loss = torch.mean((u_ic_pred - u_initial) ** 2)
-            total_loss += self.causal_weight * ic_loss  # Extra weight for IC
+            # Use fixed weight of 2.0 instead of causal_weight to prevent gradient explosion
+            total_loss += 2.0 * ic_loss
             loss_dict['initial_loss'] = ic_loss.item()
         else:
             loss_dict['initial_loss'] = 0.0
