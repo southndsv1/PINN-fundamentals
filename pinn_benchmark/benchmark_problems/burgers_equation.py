@@ -59,39 +59,32 @@ class BurgersEquation:
         Returns:
             PDE residual
         """
-        # Ensure requires_grad is enabled
+        # Ensure requires_grad is enabled by cloning if necessary
         if not xt.requires_grad:
-            xt.requires_grad = True
+            xt = xt.clone().detach().requires_grad_(True)
 
         # Network prediction
         u = network(xt)
 
-        # Extract coordinates for gradient computation
-        x = xt[:, 0:1]
-        t = xt[:, 1:2]
-
-        # First derivatives
-        u_t = torch.autograd.grad(
-            u, t,
+        # Compute gradients with respect to full xt tensor
+        grad_u = torch.autograd.grad(
+            u, xt,
             grad_outputs=torch.ones_like(u),
             create_graph=True,
             retain_graph=True
         )[0]
 
-        u_x = torch.autograd.grad(
-            u, x,
-            grad_outputs=torch.ones_like(u),
-            create_graph=True,
-            retain_graph=True
-        )[0]
+        # Extract spatial and temporal derivatives
+        u_x = grad_u[:, 0:1]  # du/dx
+        u_t = grad_u[:, 1:2]  # du/dt
 
-        # Second derivative
+        # Second spatial derivative
         u_xx = torch.autograd.grad(
-            u_x, x,
+            u_x, xt,
             grad_outputs=torch.ones_like(u_x),
             create_graph=True,
             retain_graph=True
-        )[0]
+        )[0][:, 0:1]  # d²u/dx²
 
         # PDE residual (nonlinear advection-diffusion)
         residual = u_t + u * u_x - self.nu * u_xx

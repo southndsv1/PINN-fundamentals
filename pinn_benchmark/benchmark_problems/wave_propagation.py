@@ -60,46 +60,42 @@ class WavePropagation1D:
         Returns:
             PDE residual
         """
-        # Ensure requires_grad is enabled
+        # Ensure requires_grad is enabled by cloning if necessary
         if not xt.requires_grad:
-            xt.requires_grad = True
+            xt = xt.clone().detach().requires_grad_(True)
 
         # Network prediction
         u = network(xt)
 
-        # Extract coordinates for gradient computation
-        x = xt[:, 0:1]
-        t = xt[:, 1:2]
-
-        # First derivatives
-        u_t = torch.autograd.grad(
-            u, t,
+        # Compute first gradients with respect to full xt tensor
+        grad_u = torch.autograd.grad(
+            u, xt,
             grad_outputs=torch.ones_like(u),
             create_graph=True,
             retain_graph=True
         )[0]
 
-        u_x = torch.autograd.grad(
-            u, x,
-            grad_outputs=torch.ones_like(u),
-            create_graph=True,
-            retain_graph=True
-        )[0]
+        # Extract spatial and temporal derivatives
+        u_x = grad_u[:, 0:1]  # du/dx
+        u_t = grad_u[:, 1:2]  # du/dt
 
-        # Second derivatives
-        u_tt = torch.autograd.grad(
-            u_t, t,
-            grad_outputs=torch.ones_like(u_t),
-            create_graph=True,
-            retain_graph=True
-        )[0]
-
-        u_xx = torch.autograd.grad(
-            u_x, x,
+        # Second spatial derivative
+        grad_u_x = torch.autograd.grad(
+            u_x, xt,
             grad_outputs=torch.ones_like(u_x),
             create_graph=True,
             retain_graph=True
         )[0]
+        u_xx = grad_u_x[:, 0:1]  # d²u/dx²
+
+        # Second temporal derivative
+        grad_u_t = torch.autograd.grad(
+            u_t, xt,
+            grad_outputs=torch.ones_like(u_t),
+            create_graph=True,
+            retain_graph=True
+        )[0]
+        u_tt = grad_u_t[:, 1:2]  # d²u/dt²
 
         # PDE residual
         residual = u_tt - self.c**2 * u_xx
