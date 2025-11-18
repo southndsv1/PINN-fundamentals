@@ -22,6 +22,7 @@ wheels/
 
 # Results
 results/
+fast_results/
 # demo_results/ - Allow demo results to be committed
 # *.png - Allow plots to be committed
 # *.jpg - Allow plots to be committed
